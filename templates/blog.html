@@ -23,13 +23,13 @@
       --accent-foreground: 220 20% 6%;
       --border: 220 15% 15%;
       --radius: 0.75rem;
-      
+
       /* Portfolio specific effects */
       --hero-gradient: linear-gradient(135deg, hsl(193 100% 20%), hsl(220 20% 8%));
       --card-gradient: linear-gradient(135deg, hsl(220 20% 10%), hsl(220 15% 8%));
       --accent-glow: 0 0 30px hsl(193 100% 50% / 0.3);
       --subtle-glow: 0 4px 20px hsl(193 100% 50% / 0.1);
-      
+
       --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
@@ -256,13 +256,19 @@
     }
 
     @keyframes shake {
-      0%, 100% {
+
+      0%,
+      100% {
         transform: translateX(0);
       }
-      20%, 60% {
+
+      20%,
+      60% {
         transform: translateX(-5px);
       }
-      40%, 80% {
+
+      40%,
+      80% {
         transform: translateX(5px);
       }
     }
@@ -300,8 +306,6 @@
       transform: translateY(-2px);
       filter: drop-shadow(var(--subtle-glow));
     }
-
-
 
     /* Floating particles */
     .particle {
@@ -376,8 +380,6 @@
       main {
         padding: 1.25rem;
       }
-
-
     }
   </style>
 </head>

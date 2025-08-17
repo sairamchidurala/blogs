@@ -258,7 +258,27 @@
             filter: drop-shadow(var(--subtle-glow));
         }
 
+        /* Search toggle button */
+        #searchToggle {
+            background: hsl(var(--primary));
+            color: hsl(var(--primary-foreground));
+            border: none;
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: var(--subtle-glow);
+            transition: var(--transition);
+        }
 
+        #searchToggle:hover {
+            background: hsl(var(--primary) / 0.8);
+            transform: scale(1.1);
+            box-shadow: var(--accent-glow);
+        }
 
         /* Floating particles */
         .particle {
@@ -291,39 +311,6 @@
             .card {
                 padding: 1.5rem;
             }
-
-            .header-controls {
-                top: 1rem;
-                right: 1rem;
-            }
-
-            .search-container {
-                display: none !important;
-            }
-
-            .search-container.active {
-                display: block !important;
-                position: fixed;
-                top: 4rem;
-                left: 1rem;
-                right: 1rem;
-                width: auto;
-                background: hsl(var(--card) / 0.95);
-                backdrop-filter: blur(12px);
-                border-radius: var(--radius);
-                padding: 1rem;
-                box-shadow: var(--accent-glow);
-                border: 1px solid hsl(var(--border));
-            }
-
-            .mobile-search-toggle {
-                display: flex !important;
-            }
-
-            .search-container.active #searchInput {
-                width: calc(100% - 5rem);
-                padding: 0.8rem 2.5rem 0.8rem 2.5rem;
-            }
         }
 
         @media (max-width: 480px) {
@@ -340,7 +327,12 @@
                 padding: 0 1rem;
             }
 
-
+            .search-container {
+                top: 4rem;
+                left: 1rem;
+                right: 1rem;
+                width: auto;
+            }
         }
 
         /* Update your search input styles */
@@ -354,35 +346,7 @@
             align-items: center;
         }
 
-        .mobile-search-toggle {
-            display: flex;
-            background: hsl(var(--primary));
-            color: hsl(var(--primary-foreground));
-            border: none;
-            width: 2.5rem;
-            height: 2.5rem;
-            border-radius: 50%;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            box-shadow: var(--subtle-glow);
-            transition: var(--transition);
-        }
-
-        .mobile-search-toggle:hover {
-            background: hsl(var(--primary) / 0.8);
-            transform: scale(1.1);
-            box-shadow: var(--accent-glow);
-        }
-
         .search-container {
-            position: relative;
-            display: none;
-            align-items: center;
-        }
-
-        .search-container.active {
-            display: flex;
             position: fixed;
             top: 4rem;
             right: 1.5rem;
@@ -393,6 +357,12 @@
             padding: 1rem;
             box-shadow: var(--accent-glow);
             border: 1px solid hsl(var(--border));
+            display: none;
+            align-items: center;
+        }
+
+        .search-container.active {
+            display: flex;
         }
 
         #searchInput {
@@ -434,7 +404,26 @@
             color: hsl(var(--accent));
         }
 
+        #searchButton {
+            background: hsl(var(--primary));
+            color: hsl(var(--primary-foreground));
+            border: none;
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: var(--subtle-glow);
+            transition: var(--transition);
+        }
 
+        #searchButton:hover {
+            background: hsl(var(--primary) / 0.8);
+            transform: scale(1.1);
+            box-shadow: var(--accent-glow);
+        }
 
         /* Add pagination styles */
         .pagination {
@@ -534,7 +523,7 @@
 <body>
 
     <div class="header-controls">
-        <button class="mobile-search-toggle" id="mobileSearchToggle" aria-label="Toggle search">
+        <button id="searchToggle" aria-label="Toggle search">
             <i class="fas fa-search"></i>
         </button>
         <div class="search-container" id="searchContainer">
@@ -580,8 +569,6 @@
         {% endfor %}
     </main>
 
-
-
     <footer>
         <div class="footer-content">
             <div class="social-links">
@@ -598,15 +585,31 @@
         // Set current year
         document.getElementById('year').textContent = new Date().getFullYear();
 
+        // Search toggle functionality
+        const searchToggle = document.getElementById('searchToggle');
+        const searchContainer = document.getElementById('searchContainer');
 
-        document.addEventListener('DOMContentLoaded', function() {
+        searchToggle.addEventListener('click', function () {
+            searchContainer.classList.toggle('active');
+            if (searchContainer.classList.contains('active')) {
+                document.getElementById('searchInput').focus();
+            }
+        });
+
+        // Close search on outside click
+        document.addEventListener('click', function (e) {
+            if (!searchContainer.contains(e.target) && !searchToggle.contains(e.target)) {
+                searchContainer.classList.remove('active');
+            }
+        });
+        document.addEventListener('DOMContentLoaded', function () {
             const searchInput = document.getElementById('searchInput');
-            const clearIcon = document.getElementById('clearSearch');
 
             function performSearch() {
                 const query = searchInput.value.trim();
                 if (query) {
-                    window.location.href = `/blog?query=${encodeURIComponent(query)}`;
+                    const encodedQuery = encodeURIComponent(query);
+                    window.location.href = `/blog/post/${encodedQuery}`;
                 }
             }
 
@@ -618,43 +621,10 @@
                 }
             });
 
-            // Clear search functionality
-            clearIcon.addEventListener('click', function () {
-                searchInput.value = '';
-                searchInput.focus();
-                clearIcon.style.opacity = '0';
-            });
-
-            // Show/hide clear icon
-            searchInput.addEventListener('input', function () {
-                clearIcon.style.opacity = this.value ? '1' : '0';
-            });
-
-            // Mobile search toggle
-            const mobileToggle = document.getElementById('mobileSearchToggle');
-            const searchContainer = document.getElementById('searchContainer');
-            
-            mobileToggle.addEventListener('click', function() {
-                searchContainer.classList.toggle('active');
-                if (searchContainer.classList.contains('active')) {
-                    searchInput.focus();
-                }
-            });
-
-            // Close mobile search on outside click
-            document.addEventListener('click', function(e) {
-                if (!searchContainer.contains(e.target) && !mobileToggle.contains(e.target)) {
-                    searchContainer.classList.remove('active');
-                }
-            });
-
             // Focus search input on Ctrl+K
             document.addEventListener('keydown', function (e) {
                 if (e.ctrlKey && e.key === 'k') {
                     e.preventDefault();
-                    if (window.innerWidth <= 768) {
-                        searchContainer.classList.add('active');
-                    }
                     searchInput.focus();
                 }
             });
@@ -700,10 +670,19 @@
         // Initialize particles
         createParticles();
 
+        // Clear functionality
+        const searchInput = document.getElementById('searchInput');
+        const clearIcon = document.getElementById('clearSearch');
 
+        clearIcon.addEventListener('click', function () {
+            searchInput.value = '';
+            searchInput.focus();
+            clearIcon.style.opacity = '0';
+        });
 
-
-
+        searchInput.addEventListener('input', function () {
+            clearIcon.style.opacity = this.value ? '1' : '0';
+        });
 
         // Portfolio-matched theme is already applied via CSS variables
     </script>

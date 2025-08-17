@@ -1,9 +1,11 @@
 import openai
 import os
 from dotenv import load_dotenv
+import httpx
 
 load_dotenv()
 
+USE_GPT = os.getenv("USE_GPT", "true").lower() == "true"
 client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY")) if USE_GPT else None
 
 async def call_openai(prompt: str, blog_text: bool = False) -> str:
@@ -38,14 +40,12 @@ async def _call_gemini_simple(prompt: str, blog_text: bool = False) -> str:
         print(f"[Gemini API Error] {e}")
         return "⚠️ Sorry, I couldn't reach the AI service. Please try again later."
 
-import httpx
-
-USE_GPT = os.getenv("USE_GPT", "true").lower() == "true"
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"
 
 async def get_category_and_blog(topic: str) -> tuple:
     """Get category first, then generate full blog"""
+    print("using " + ("GPT" if USE_GPT else "Gemini"))
     if USE_GPT:
         return await _get_category_and_blog_gpt(topic)
     else:

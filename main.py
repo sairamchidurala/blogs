@@ -15,6 +15,11 @@ from models import Blog
 from datetime import datetime
 from dotenv import load_dotenv
 from gptapi import call_openai, get_category_and_blog
+import logging
+
+# Setup logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
 load_dotenv()
 
@@ -31,8 +36,10 @@ async def send_api_request(token: str, method: str, payload: dict):
         async with httpx.AsyncClient(timeout=10.0) as client:
             response = await client.post(url, json=payload)
             response.raise_for_status()
+            return True
     except httpx.HTTPError as e:
-        print(f"[Telegram API Error] {e}")
+        logger.error(f"Telegram API Error: {e}")
+        return False
 
 @app.post("/webhook/{bot_name}")
 async def telegram_webhook(bot_name: str, request: Request):
@@ -60,11 +67,21 @@ async def telegram_webhook(bot_name: str, request: Request):
             await generate_image(text, chat_id, token, message["from"]["first_name"])
             return {"ok": True}
         
-        gpt_reply = await call_openai(user_input, False)
-        await send_api_request(token, "sendMessage", {
-            "chat_id": chat_id,
-            "text": gpt_reply.replace('<', '&lt;').replace('>', '&gt;').replace('`', "'")
-        })
+        try:
+            gpt_reply = await call_openai(user_input, False)
+            sanitized_text = gpt_reply.replace('<', '&lt;').replace('>', '&gt;').replace('`', "'")
+            success = await send_api_request(token, "sendMessage", {
+                "chat_id": chat_id,
+                "text": sanitized_text
+            })
+            if not success:
+                logger.error(f"Failed to send message to chat {chat_id}")
+        except Exception as e:
+            logger.error(f"Error processing message: {e}")
+            await send_api_request(token, "sendMessage", {
+                "chat_id": chat_id,
+                "text": "⚠️ Sorry, I encountered an error. Please try again."
+            })
 
     return {"ok": True}
 
@@ -159,40 +176,9 @@ async def blogs_home(request: Request, query: str = None, page: int = 1):
         
     async with SessionLocal() as session:
         if query:
-            # Check if blog already exists
-            result = await session.execute(select(Blog).where(Blog.query == query))
-            existing = result.scalar_one_or_none()
-
-            if existing:
-                content_html = markdown(existing.content)
-                return templates.TemplateResponse("blog.html", {
-                    "request": request,
-                    "title": existing.title,
-                    "content": content_html
-                })
-            else:
-                # Get category and generate blog
-                category, title, raw_content = await get_category_and_blog(query)
-                if raw_content.startswith("⚠️"):
-                    return templates.TemplateResponse("blog.html", {
-                        "request": request,
-                        "title": query,
-                        "content": "",
-                        "error": raw_content
-                    })
-
-                # Save to DB with category
-                new_blog = Blog(query=query, title=title, content=raw_content, category=category)
-                session.add(new_blog)
-                await session.commit()
-
-                content_html = markdown(raw_content)
-                return templates.TemplateResponse("blog.html", {
-                    "request": request,
-                    "title": title,
-                    "content": content_html
-                })
-        else:
+            # Redirect to individual blog post
+            return RedirectResponse(url=f"/blog/post/{urllib.parse.quote(query)}")
+        
             # Get blogs grouped by category (max 3 per category)
             categories_result = await session.execute(
                 select(Blog.category, func.count(Blog.id).label('count'))
@@ -265,3 +251,11 @@ async def insert_image_url(user: str, query: str, link: str, chat_id: int):
         await session.commit()
         await session.refresh(new_entry)
         return new_entry.id
+
+@app.get("/health")
+async def health_check():
+    return {"status": "healthy", "timestamp": datetime.utcnow()}
+
+@app.get("/")
+async def root():
+    return RedirectResponse(url="/blog")

@@ -258,31 +258,7 @@
             filter: drop-shadow(var(--subtle-glow));
         }
 
-        /* Dark mode toggle */
-        #darkToggle {
-            position: fixed;
-            top: 1.5rem;
-            right: 1.5rem;
-            z-index: 100;
-            background: hsl(var(--primary));
-            color: hsl(var(--primary-foreground));
-            border: none;
-            width: 2.5rem;
-            height: 2.5rem;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            box-shadow: var(--subtle-glow);
-            transition: var(--transition);
-        }
 
-        #darkToggle:hover {
-            background: hsl(var(--primary) / 0.8);
-            transform: scale(1.1);
-            box-shadow: var(--accent-glow);
-        }
 
         /* Floating particles */
         .particle {
@@ -315,6 +291,39 @@
             .card {
                 padding: 1.5rem;
             }
+
+            .header-controls {
+                top: 1rem;
+                right: 1rem;
+            }
+
+            .search-container {
+                display: none !important;
+            }
+
+            .search-container.active {
+                display: block !important;
+                position: fixed;
+                top: 4rem;
+                left: 1rem;
+                right: 1rem;
+                width: auto;
+                background: hsl(var(--card) / 0.95);
+                backdrop-filter: blur(12px);
+                border-radius: var(--radius);
+                padding: 1rem;
+                box-shadow: var(--accent-glow);
+                border: 1px solid hsl(var(--border));
+            }
+
+            .mobile-search-toggle {
+                display: flex !important;
+            }
+
+            .search-container.active #searchInput {
+                width: calc(100% - 5rem);
+                padding: 0.8rem 2.5rem 0.8rem 2.5rem;
+            }
         }
 
         @media (max-width: 480px) {
@@ -331,12 +340,7 @@
                 padding: 0 1rem;
             }
 
-            #darkToggle {
-                top: 1rem;
-                right: 1rem;
-                width: 2.25rem;
-                height: 2.25rem;
-            }
+
         }
 
         /* Update your search input styles */
@@ -350,10 +354,45 @@
             align-items: center;
         }
 
+        .mobile-search-toggle {
+            display: flex;
+            background: hsl(var(--primary));
+            color: hsl(var(--primary-foreground));
+            border: none;
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 50%;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: var(--subtle-glow);
+            transition: var(--transition);
+        }
+
+        .mobile-search-toggle:hover {
+            background: hsl(var(--primary) / 0.8);
+            transform: scale(1.1);
+            box-shadow: var(--accent-glow);
+        }
+
         .search-container {
             position: relative;
-            display: flex;
+            display: none;
             align-items: center;
+        }
+
+        .search-container.active {
+            display: flex;
+            position: fixed;
+            top: 4rem;
+            right: 1.5rem;
+            width: 300px;
+            background: hsl(var(--card) / 0.95);
+            backdrop-filter: blur(12px);
+            border-radius: var(--radius);
+            padding: 1rem;
+            box-shadow: var(--accent-glow);
+            border: 1px solid hsl(var(--border));
         }
 
         #searchInput {
@@ -364,7 +403,7 @@
             backdrop-filter: blur(12px);
             color: hsl(var(--foreground));
             box-shadow: var(--subtle-glow);
-            width: 200px;
+            width: calc(100% - 5rem);
             transition: all 0.3s ease;
             font-family: inherit;
         }
@@ -373,7 +412,6 @@
             outline: none;
             box-shadow: var(--accent-glow);
             border-color: hsl(var(--primary));
-            width: 240px;
         }
 
         .search-icon {
@@ -396,26 +434,7 @@
             color: hsl(var(--accent));
         }
 
-        #searchButton {
-            background: hsl(var(--primary));
-            color: hsl(var(--primary-foreground));
-            border: none;
-            width: 2.5rem;
-            height: 2.5rem;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            box-shadow: var(--subtle-glow);
-            transition: var(--transition);
-        }
 
-        #searchButton:hover {
-            background: hsl(var(--primary) / 0.8);
-            transform: scale(1.1);
-            box-shadow: var(--accent-glow);
-        }
 
         /* Add pagination styles */
         .pagination {
@@ -515,14 +534,14 @@
 <body>
 
     <div class="header-controls">
-        <div class="search-container">
+        <button class="mobile-search-toggle" id="mobileSearchToggle" aria-label="Toggle search">
+            <i class="fas fa-search"></i>
+        </button>
+        <div class="search-container" id="searchContainer">
             <i class="fas fa-search search-icon"></i>
             <input type="text" id="searchInput" placeholder="Search blogs..." aria-label="Search blogs">
             <i class="fas fa-times clear-icon" id="clearSearch"></i>
         </div>
-        <button id="darkToggle" aria-label="Toggle theme">
-            <i class="fas fa-palette"></i>
-        </button>
     </div>
 
     <header>
@@ -579,25 +598,15 @@
         // Set current year
         document.getElementById('year').textContent = new Date().getFullYear();
 
-        // Dark mode toggle functionality
-        const toggleBtn = document.getElementById('darkToggle');
-        const icon = toggleBtn.querySelector('i');
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        const storedMode = localStorage.getItem('dark-mode');
 
-        // Set initial mode
-        if (storedMode === 'true' || (storedMode === null && prefersDark)) {
-            document.body.classList.add('dark-mode');
-            icon.classList.replace('fa-moon', 'fa-sun');
-        }
         document.addEventListener('DOMContentLoaded', function() {
             const searchInput = document.getElementById('searchInput');
+            const clearIcon = document.getElementById('clearSearch');
 
             function performSearch() {
                 const query = searchInput.value.trim();
                 if (query) {
-                    const encodedQuery = encodeURIComponent(query);
-                    window.location.href = `/blog/post/${encodedQuery}`;
+                    window.location.href = `/blog?query=${encodeURIComponent(query)}`;
                 }
             }
 
@@ -609,10 +618,43 @@
                 }
             });
 
+            // Clear search functionality
+            clearIcon.addEventListener('click', function () {
+                searchInput.value = '';
+                searchInput.focus();
+                clearIcon.style.opacity = '0';
+            });
+
+            // Show/hide clear icon
+            searchInput.addEventListener('input', function () {
+                clearIcon.style.opacity = this.value ? '1' : '0';
+            });
+
+            // Mobile search toggle
+            const mobileToggle = document.getElementById('mobileSearchToggle');
+            const searchContainer = document.getElementById('searchContainer');
+            
+            mobileToggle.addEventListener('click', function() {
+                searchContainer.classList.toggle('active');
+                if (searchContainer.classList.contains('active')) {
+                    searchInput.focus();
+                }
+            });
+
+            // Close mobile search on outside click
+            document.addEventListener('click', function(e) {
+                if (!searchContainer.contains(e.target) && !mobileToggle.contains(e.target)) {
+                    searchContainer.classList.remove('active');
+                }
+            });
+
             // Focus search input on Ctrl+K
             document.addEventListener('keydown', function (e) {
                 if (e.ctrlKey && e.key === 'k') {
                     e.preventDefault();
+                    if (window.innerWidth <= 768) {
+                        searchContainer.classList.add('active');
+                    }
                     searchInput.focus();
                 }
             });
@@ -659,32 +701,9 @@
         createParticles();
 
 
-        // Toggle function
-        toggleBtn.addEventListener('click', () => {
-            document.body.classList.toggle('dark-mode');
-            const isDark = document.body.classList.contains('dark-mode');
-            localStorage.setItem('dark-mode', isDark);
 
-            if (isDark) {
-                icon.classList.replace('fa-moon', 'fa-sun');
-            } else {
-                icon.classList.replace('fa-sun', 'fa-moon');
-            }
-        });
 
-        // Clear functionality
-        const searchInput = document.getElementById('searchInput');
-        const clearIcon = document.getElementById('clearSearch');
 
-        clearIcon.addEventListener('click', function () {
-            searchInput.value = '';
-            searchInput.focus();
-            clearIcon.style.opacity = '0';
-        });
-
-        searchInput.addEventListener('input', function () {
-            clearIcon.style.opacity = this.value ? '1' : '0';
-        });
 
         // Portfolio-matched theme is already applied via CSS variables
     </script>

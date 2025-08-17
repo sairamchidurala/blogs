@@ -590,31 +590,26 @@
             document.body.classList.add('dark-mode');
             icon.classList.replace('fa-moon', 'fa-sun');
         }
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
             const searchInput = document.getElementById('searchInput');
-            const searchButton = document.getElementById('searchButton');
 
             function performSearch() {
                 const query = searchInput.value.trim();
                 if (query) {
-                    // Encode the query for URL
                     const encodedQuery = encodeURIComponent(query);
-                    // Redirect to the blog page with the query
-                    window.location.href = `/blog/${encodedQuery}`;
+                    window.location.href = `/blog/post/${encodedQuery}`;
                 }
             }
 
-            // Search on button click
-            searchButton.addEventListener('click', performSearch);
-
             // Search on Enter key
-            searchInput.addEventListener('keypress', function (e) {
+            searchInput.addEventListener('keydown', function (e) {
                 if (e.key === 'Enter') {
+                    e.preventDefault();
                     performSearch();
                 }
             });
 
-            // Focus search input on Ctrl+K (common search shortcut)
+            // Focus search input on Ctrl+K
             document.addEventListener('keydown', function (e) {
                 if (e.ctrlKey && e.key === 'k') {
                     e.preventDefault();

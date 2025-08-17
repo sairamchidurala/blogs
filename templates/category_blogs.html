@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>{{ category.title() }} Blogs</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            /* Portfolio-matched color system */
+            --background: 220 20% 6%;
+            --foreground: 210 20% 98%;
+            --card: 220 20% 8%;
+            --card-foreground: 210 20% 95%;
+            --primary: 193 100% 50%;
+            --primary-foreground: 220 20% 6%;
+            --secondary: 220 15% 12%;
+            --secondary-foreground: 210 20% 90%;
+            --muted: 220 15% 10%;
+            --muted-foreground: 210 10% 60%;
+            --accent: 193 100% 50%;
+            --accent-foreground: 220 20% 6%;
+            --border: 220 15% 15%;
+            --radius: 0.75rem;
+            
+            /* Portfolio specific effects */
+            --hero-gradient: linear-gradient(135deg, hsl(193 100% 20%), hsl(220 20% 8%));
+            --card-gradient: linear-gradient(135deg, hsl(220 20% 10%), hsl(220 15% 8%));
+            --accent-glow: 0 0 30px hsl(193 100% 50% / 0.3);
+            --subtle-glow: 0 4px 20px hsl(193 100% 50% / 0.1);
+            
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: hsl(var(--background));
+            color: hsl(var(--foreground));
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* Portfolio-matched gradient background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg,
+                    hsl(193 100% 20% / 0.1) 0%,
+                    hsl(220 20% 8% / 0.1) 50%,
+                    hsl(193 100% 50% / 0.05) 100%);
+            z-index: -1;
+            animation: gradientShift 15s ease infinite;
+            background-size: 200% 200%;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        header {
+            background: var(--hero-gradient);
+            color: hsl(var(--foreground));
+            padding: 2rem 1.5rem;
+            text-align: center;
+            box-shadow: var(--subtle-glow);
+            position: relative;
+            overflow: hidden;
+            border-bottom: 1px solid hsl(var(--border));
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 2.2rem;
+            font-weight: 700;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .back-button {
+            position: fixed;
+            top: 1.5rem;
+            left: 1.5rem;
+            z-index: 100;
+            background: hsl(var(--primary));
+            color: hsl(var(--primary-foreground));
+            border: none;
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: var(--subtle-glow);
+            transition: var(--transition);
+        }
+
+        .back-button:hover {
+            background: hsl(var(--primary) / 0.8);
+            transform: scale(1.1);
+            box-shadow: var(--accent-glow);
+        }
+
+        main {
+            max-width: 1200px;
+            margin: 3rem auto;
+            padding: 0 1.5rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .card {
+            background: var(--card-gradient);
+            backdrop-filter: blur(12px);
+            border-radius: var(--radius);
+            padding: 1.75rem;
+            box-shadow: var(--subtle-glow);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid hsl(var(--border));
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(to bottom, hsl(var(--primary)), hsl(var(--accent)));
+            transition: var(--transition);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--accent-glow);
+            border-color: hsl(var(--primary) / 0.3);
+        }
+
+        .card a {
+            text-decoration: none;
+            color: hsl(var(--primary));
+            font-size: 1.25rem;
+            font-weight: 600;
+            display: block;
+            margin-bottom: 0.75rem;
+            transition: var(--transition);
+        }
+
+        .card .date {
+            font-size: 0.9rem;
+            color: hsl(var(--muted-foreground));
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 3rem;
+            padding: 1rem 0;
+        }
+
+        .pagination a, .pagination .disabled {
+            background: hsl(var(--primary));
+            color: hsl(var(--primary-foreground));
+            border: 1px solid hsl(var(--border));
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+        }
+
+        .pagination a:hover {
+            background: hsl(var(--primary) / 0.8);
+            transform: translateY(-2px);
+            box-shadow: var(--subtle-glow);
+        }
+
+        .pagination .disabled {
+            background: hsl(var(--muted));
+            color: hsl(var(--muted-foreground));
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .page-info {
+            display: flex;
+            align-items: center;
+            color: hsl(var(--muted-foreground));
+        }
+
+        @media (max-width: 768px) {
+            .back-button {
+                top: 1rem;
+                left: 1rem;
+                width: 2.25rem;
+                height: 2.25rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <button class="back-button" onclick="window.location.href='/blog'" aria-label="Back to all blogs">
+        <i class="fas fa-arrow-left"></i>
+    </button>
+
+    <header>
+        <h1>{{ category.title() }} Articles</h1>
+    </header>
+
+    <main>
+        <div class="grid">
+            {% for blog in blogs %}
+            <div class="card">
+                <a href="/blog/post/{{ blog.query }}">{{ blog.title }}</a>
+                <div class="date">
+                    <i class="far fa-calendar-alt"></i>
+                    {{ blog.created_at.strftime('%b %d, %Y') }}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="pagination">
+            {% if current_page > 1 %}
+            <a href="/blog/category/{{ category }}?page={{ current_page - 1 }}">Previous</a>
+            {% else %}
+            <span class="disabled">Previous</span>
+            {% endif %}
+
+            <div class="page-info">
+                Page {{ current_page }} of {{ total_pages }}
+            </div>
+
+            {% if current_page < total_pages %}
+            <a href="/blog/category/{{ category }}?page={{ current_page + 1 }}">Next</a>
+            {% else %}
+            <span class="disabled">Next</span>
+            {% endif %}
+        </div>
+    </main>
+</body>
+
+</html>

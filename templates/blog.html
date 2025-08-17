@@ -8,17 +8,28 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     :root {
-      --primary: #2563eb;
-      --primary-dark: #1e40af;
-      --secondary: #7c3aed;
-      --accent: #ec4899;
-      --bg-light: #f8fafc;
-      --bg-dark: #0f172a;
-      --text-light: #1e293b;
-      --text-dark: #f1f5f9;
-      --glass-light: rgba(255, 255, 255, 0.85);
-      --glass-dark: rgba(15, 23, 42, 0.85);
-      --card-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      /* Portfolio-matched color system */
+      --background: 220 20% 6%;
+      --foreground: 210 20% 98%;
+      --card: 220 20% 8%;
+      --card-foreground: 210 20% 95%;
+      --primary: 193 100% 50%;
+      --primary-foreground: 220 20% 6%;
+      --secondary: 220 15% 12%;
+      --secondary-foreground: 210 20% 90%;
+      --muted: 220 15% 10%;
+      --muted-foreground: 210 10% 60%;
+      --accent: 193 100% 50%;
+      --accent-foreground: 220 20% 6%;
+      --border: 220 15% 15%;
+      --radius: 0.75rem;
+      
+      /* Portfolio specific effects */
+      --hero-gradient: linear-gradient(135deg, hsl(193 100% 20%), hsl(220 20% 8%));
+      --card-gradient: linear-gradient(135deg, hsl(220 20% 10%), hsl(220 15% 8%));
+      --accent-glow: 0 0 30px hsl(193 100% 50% / 0.3);
+      --subtle-glow: 0 4px 20px hsl(193 100% 50% / 0.1);
+      
       --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
@@ -37,18 +48,13 @@
       min-height: 100vh;
       display: flex;
       flex-direction: column;
-      background: var(--bg-light);
-      color: var(--text-light);
+      background: hsl(var(--background));
+      color: hsl(var(--foreground));
       transition: var(--transition);
       line-height: 1.6;
     }
 
-    body.dark-mode {
-      background: var(--bg-dark);
-      color: var(--text-dark);
-    }
-
-    /* Gradient background animation */
+    /* Portfolio-matched gradient background */
     body::before {
       content: '';
       position: fixed;
@@ -57,19 +63,12 @@
       width: 100%;
       height: 100%;
       background: linear-gradient(135deg,
-          rgba(37, 99, 235, 0.05) 0%,
-          rgba(124, 58, 237, 0.05) 50%,
-          rgba(236, 72, 153, 0.05) 100%);
+          hsl(193 100% 20% / 0.1) 0%,
+          hsl(220 20% 8% / 0.1) 50%,
+          hsl(193 100% 50% / 0.05) 100%);
       z-index: -1;
       animation: gradientShift 15s ease infinite;
       background-size: 200% 200%;
-    }
-
-    body.dark-mode::before {
-      background: linear-gradient(135deg,
-          rgba(37, 99, 235, 0.1) 0%,
-          rgba(124, 58, 237, 0.1) 50%,
-          rgba(236, 72, 153, 0.1) 100%);
     }
 
     @keyframes gradientShift {
@@ -94,19 +93,14 @@
     }
 
     main {
-      background: var(--glass-light);
+      background: var(--card-gradient);
       backdrop-filter: blur(12px);
-      border-radius: 1rem;
+      border-radius: var(--radius);
       padding: 2.5rem;
-      box-shadow: var(--card-shadow);
+      box-shadow: var(--subtle-glow);
       transition: var(--transition);
       animation: fadeInUp 0.8s ease-out;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-
-    body.dark-mode main {
-      background: var(--glass-dark);
-      border: 1px solid rgba(255, 255, 255, 0.05);
+      border: 1px solid hsl(var(--border));
     }
 
     @keyframes fadeInUp {
@@ -125,16 +119,10 @@
     h1,
     h2,
     h3 {
-      color: var(--primary);
+      color: hsl(var(--primary));
       margin: 1.5rem 0 1rem;
       font-weight: 600;
       position: relative;
-    }
-
-    body.dark-mode h1,
-    body.dark-mode h2,
-    body.dark-mode h3 {
-      color: var(--secondary);
     }
 
     h1 {
@@ -154,7 +142,7 @@
       left: 0;
       width: 60px;
       height: 3px;
-      background: var(--accent);
+      background: hsl(var(--accent));
       transition: width 0.3s ease;
     }
 
@@ -171,11 +159,11 @@
       background: #1e293b;
       color: #f8fafc;
       padding: 1.25rem;
-      border-radius: 0.75rem;
+      border-radius: var(--radius);
       overflow-x: auto;
       font-family: 'Fira Code', monospace;
       margin: 1.5rem 0;
-      box-shadow: var(--card-shadow);
+      box-shadow: var(--subtle-glow);
       transition: var(--transition);
       position: relative;
     }
@@ -187,40 +175,33 @@
       left: 0;
       width: 4px;
       height: 100%;
-      background: var(--accent);
-      border-radius: 0.75rem 0 0 0.75rem;
+      background: hsl(var(--accent));
+      border-radius: var(--radius) 0 0 var(--radius);
     }
 
     pre:hover {
       transform: translateY(-2px);
-      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+      box-shadow: var(--accent-glow);
     }
 
     code {
       font-family: 'Fira Code', monospace;
-      background: rgba(226, 232, 240, 0.2);
+      background: hsl(var(--muted) / 0.5);
       padding: 0.2rem 0.4rem;
       border-radius: 0.25rem;
       font-size: 0.9em;
-    }
-
-    body.dark-mode code {
-      background: rgba(15, 23, 42, 0.5);
+      color: hsl(var(--foreground));
     }
 
     /* Blockquotes */
     blockquote {
-      border-left: 4px solid var(--accent);
+      border-left: 4px solid hsl(var(--accent));
       margin: 1.5rem 0;
       padding: 1rem 1.5rem;
-      background: rgba(226, 232, 240, 0.2);
-      border-radius: 0 0.5rem 0.5rem 0;
+      background: hsl(var(--muted) / 0.3);
+      border-radius: 0 var(--radius) var(--radius) 0;
       font-style: italic;
       transition: var(--transition);
-    }
-
-    body.dark-mode blockquote {
-      background: rgba(15, 23, 42, 0.5);
     }
 
     blockquote:hover {
@@ -231,9 +212,7 @@
     ul,
     ol {
       margin: 1rem 0 1rem 1.5rem;
-      /* Reduced left margin */
       padding-left: 0.5rem;
-      /* Added some padding */
     }
 
     li {
@@ -248,12 +227,11 @@
 
     ul li::before {
       content: '•';
-      color: var(--accent);
+      color: hsl(var(--accent));
       font-weight: bold;
       display: inline-block;
       width: 1em;
       margin-left: -1em;
-      /* Pulls bullet into margin */
     }
 
     /* For ordered lists */
@@ -272,25 +250,19 @@
       background: rgba(239, 68, 68, 0.1);
       border-left: 4px solid #ef4444;
       padding: 1.25rem;
-      border-radius: 0.5rem;
+      border-radius: var(--radius);
       margin: 1.5rem 0;
       animation: shake 0.5s ease;
     }
 
     @keyframes shake {
-
-      0%,
-      100% {
+      0%, 100% {
         transform: translateX(0);
       }
-
-      20%,
-      60% {
+      20%, 60% {
         transform: translateX(-5px);
       }
-
-      40%,
-      80% {
+      40%, 80% {
         transform: translateX(5px);
       }
     }
@@ -301,12 +273,8 @@
       padding: 2rem 1rem;
       margin-top: auto;
       font-size: 0.9rem;
-      color: #64748b;
+      color: hsl(var(--muted-foreground));
       transition: var(--transition);
-    }
-
-    body.dark-mode footer {
-      color: #94a3b8;
     }
 
     .footer-content {
@@ -328,18 +296,19 @@
     }
 
     .social-link:hover {
-      color: var(--accent);
+      color: hsl(var(--accent));
       transform: translateY(-2px);
+      filter: drop-shadow(var(--subtle-glow));
     }
 
-    /* Dark mode toggle */
+    /* Theme toggle */
     #darkToggle {
       position: fixed;
       top: 1.5rem;
       right: 1.5rem;
       z-index: 100;
-      background: var(--primary);
-      color: white;
+      background: hsl(var(--primary));
+      color: hsl(var(--primary-foreground));
       border: none;
       width: 2.5rem;
       height: 2.5rem;
@@ -348,19 +317,20 @@
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      box-shadow: var(--subtle-glow);
       transition: var(--transition);
     }
 
     #darkToggle:hover {
-      background: var(--primary-dark);
+      background: hsl(var(--primary) / 0.8);
       transform: scale(1.1);
+      box-shadow: var(--accent-glow);
     }
 
     /* Floating particles */
     .particle {
       position: fixed;
-      background: var(--primary);
+      background: hsl(var(--primary));
       border-radius: 50%;
       pointer-events: none;
       z-index: -1;
@@ -372,6 +342,32 @@
       to {
         transform: translateY(-100vh) rotate(360deg);
       }
+    }
+
+    /* Back button */
+    .back-button {
+      position: fixed;
+      top: 1.5rem;
+      left: 1.5rem;
+      z-index: 100;
+      background: hsl(var(--primary));
+      color: hsl(var(--primary-foreground));
+      border: none;
+      width: 2.5rem;
+      height: 2.5rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: var(--subtle-glow);
+      transition: var(--transition);
+    }
+
+    .back-button:hover {
+      background: hsl(var(--primary) / 0.8);
+      transform: scale(1.1);
+      box-shadow: var(--accent-glow);
     }
 
     /* Responsive design */
@@ -391,6 +387,13 @@
       h2 {
         font-size: 1.5rem;
       }
+
+      .back-button {
+        top: 1rem;
+        left: 1rem;
+        width: 2.25rem;
+        height: 2.25rem;
+      }
     }
 
     @media (max-width: 480px) {
@@ -405,46 +408,12 @@
         height: 2.25rem;
       }
     }
-
-    /* Add this to your existing CSS */
-    .back-button {
-      position: fixed;
-      top: 1.5rem;
-      left: 1.5rem;
-      z-index: 100;
-      background: var(--primary);
-      color: white;
-      border: none;
-      width: 2.5rem;
-      height: 2.5rem;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-      transition: var(--transition);
-    }
-
-    .back-button:hover {
-      background: var(--primary-dark);
-      transform: scale(1.1);
-    }
-
-    @media (max-width: 768px) {
-      .back-button {
-        top: 1rem;
-        left: 1rem;
-        width: 2.25rem;
-        height: 2.25rem;
-      }
-    }
   </style>
 </head>
 
 <body>
-  <button id="darkToggle" aria-label="Toggle dark mode">
-    <i class="fas fa-moon"></i>
+  <button id="darkToggle" aria-label="Toggle theme">
+    <i class="fas fa-palette"></i>
   </button>
   <button class="back-button" aria-label="Back to all blogs" onclick="window.location.href='/blog'">
     <i class="fas fa-arrow-left"></i>
@@ -463,12 +432,10 @@
   <footer>
     <div class="footer-content">
       <div class="social-links">
-        <div class="social-links">
-          <a href="https://github.com/sairamchidurala" class="social-link" aria-label="GitHub"><i
-              class="fab fa-github"></i></a>
-          <a href="https://www.linkedin.com/in/sairam-chidurala" class="social-link" aria-label="LinkedIn"><i
-              class="fab fa-linkedin"></i></a>
-        </div>
+        <a href="https://github.com/sairamchidurala" class="social-link" aria-label="GitHub"><i
+            class="fab fa-github"></i></a>
+        <a href="https://www.linkedin.com/in/sairam-chidurala" class="social-link" aria-label="LinkedIn"><i
+            class="fab fa-linkedin"></i></a>
       </div>
       <div id="footer">&copy; <span id="year"></span> Hell0Killer. All rights reserved.</div>
     </div>
@@ -477,34 +444,9 @@
     // Set current year
     document.getElementById('year').textContent = new Date().getFullYear();
 
-    // Enhanced dark mode toggle with icon change
-    const toggleBtn = document.getElementById('darkToggle');
-    const icon = toggleBtn.querySelector('i');
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const storedMode = localStorage.getItem('dark-mode');
-
-    // Set initial mode
-    if (storedMode === 'true' || (storedMode === null && prefersDark)) {
-      document.body.classList.add('dark-mode');
-      icon.classList.replace('fa-moon', 'fa-sun');
-    }
-
-    // Toggle function
-    toggleBtn.addEventListener('click', () => {
-      document.body.classList.toggle('dark-mode');
-      const isDark = document.body.classList.contains('dark-mode');
-      localStorage.setItem('dark-mode', isDark);
-
-      if (isDark) {
-        icon.classList.replace('fa-moon', 'fa-sun');
-      } else {
-        icon.classList.replace('fa-sun', 'fa-moon');
-      }
-    });
-
     // Create floating particles
     function createParticles() {
-      const colors = ['#2563eb', '#7c3aed', '#ec4899'];
+      const colors = ['hsl(193 100% 50%)', 'hsl(220 20% 8%)', 'hsl(193 100% 40%)'];
       const particleCount = window.innerWidth < 768 ? 15 : 30;
 
       for (let i = 0; i < particleCount; i++) {

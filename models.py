@@ -16,5 +16,6 @@ class Blog(Base):
     query = Column(String(255), unique=True, index=True, nullable=False)
     title = Column(String(255), nullable=False)
     content = Column(Text, nullable=False)
+    category = Column(String(100), nullable=True, index=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 

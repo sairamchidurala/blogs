@@ -21,6 +21,9 @@ load_dotenv()
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
 
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"
+
 @app.on_event("startup")
 async def startup():
     await init_db()
@@ -37,6 +40,17 @@ async def send_api_request(token: str, method: str, payload: dict):
 @app.post("/webhook/{bot_name}")
 async def telegram_webhook(bot_name: str, request: Request):
     query_params = dict(request.query_params)
+    print("\n=== FastAPI Request ===")
+    print("Method:", request.method)
+    print("URL:", request.url)
+    print("Headers:", dict(request.headers))
+    print("Query Params:", dict(request.query_params))
+    print("Client Host:", request.client.host)
+    try:
+        body = await request.json()
+        print("JSON Body:", body)
+    except:
+        print("No JSON body")
     token_from_query = query_params.get("token")
 
     if token_from_query:
@@ -57,65 +71,65 @@ async def telegram_webhook(bot_name: str, request: Request):
         user_input = message["text"]
         if user_input.startswith('.'):
             text = user_input[1:]
+            print(f"Generating image for text: {text}")
             await generate_image(text, chat_id, token, message["from"]["first_name"])
             return {"ok": True}
-        
-        gpt_reply = await call_openai(user_input, False)
+        print(f"Got text: " + user_input)
+        gemini_reply = await call_gemini(user_input, False)
         await send_api_request(token, "sendMessage", {
             "chat_id": chat_id,
-            "text": gpt_reply.replace('<', '&lt;').replace('>', '&gt;').replace('`', "'")
+            "text": gemini_reply.replace('<', '&lt;').replace('>', '&gt;').replace('`', "'")
+        })
+
+    elif "photo" in message:
+        file_id = message["photo"][-1]["file_id"]
+        await send_api_request(token, "sendPhoto", {
+            "chat_id": chat_id,
+            "photo": file_id,
+            "caption": message.get("caption", "")
+        })
+    elif "video" in message:
+        file_id = message["video"]["file_id"]
+        await send_api_request(token, "sendVideo", {
+            "chat_id": chat_id,
+            "video": file_id,
+            "caption": message.get("caption", "")
+        })
+    elif "document" in message:
+        file_id = message["document"]["file_id"]
+        await send_api_request(token, "sendDocument", {
+            "chat_id": chat_id,
+            "document": file_id,
+            "caption": message.get("caption", "")
+        })
+    elif "audio" in message:
+        file_id = message["audio"]["file_id"]
+        await send_api_request(token, "sendAudio", {
+            "chat_id": chat_id,
+            "audio": file_id,
+            "caption": message.get("caption", "")
+        })
+    elif "voice" in message:
+        file_id = message["voice"]["file_id"]
+        await send_api_request(token, "sendVoice", {
+            "chat_id": chat_id,
+            "voice": file_id
+        })
+    elif "sticker" in message:
+        file_id = message["sticker"]["file_id"]
+        await send_api_request(token, "sendSticker", {
+            "chat_id": chat_id,
+            "sticker": file_id
+        })
+    else:
+        await send_api_request(token, "sendMessage", {
+            "chat_id": chat_id,
+            "text": "Unsupported message type received."
         })
 
     return {"ok": True}
 
-@app.get("/blog/category/{category}", response_class=HTMLResponse)
-async def category_blogs(request: Request, category: str, page: int = 1):
-    if page < 1:
-        page = 1
-        
-    blogs_per_page = 12
-    offset = (page - 1) * blogs_per_page
-    
-    async with SessionLocal() as session:
-        # Get total count for category
-        total_result = await session.execute(
-            select(func.count(Blog.id)).where(Blog.category == category)
-        )
-        total = total_result.scalar() or 0
-        
-        if total == 0:
-            return templates.TemplateResponse("category_blogs.html", {
-                "request": request,
-                "blogs": [],
-                "category": category,
-                "current_page": 1,
-                "total_pages": 1
-            })
-        
-        # Get paginated blogs for category
-        blogs_result = await session.execute(
-            select(Blog)
-            .where(Blog.category == category)
-            .order_by(Blog.created_at.desc())
-            .offset(offset)
-            .limit(blogs_per_page)
-        )
-        blogs = blogs_result.scalars().all()
-        
-        total_pages = max(1, (total + blogs_per_page - 1) // blogs_per_page)
-        
-        if page > total_pages:
-            return RedirectResponse(url=f"/blog/category/{category}?page={total_pages}")
-        
-        return templates.TemplateResponse("category_blogs.html", {
-            "request": request,
-            "blogs": blogs,
-            "category": category,
-            "current_page": page,
-            "total_pages": total_pages
-        })
-
-@app.get("/blog/post/{query:path}", response_class=HTMLResponse)
+@app.get("/blog/{query:path}", response_class=HTMLResponse)
 async def individual_blog(request: Request, query: str):
     topic = urllib.parse.unquote(query)
     async with SessionLocal() as session:
@@ -221,6 +235,80 @@ async def blogs_home(request: Request, query: str = None, page: int = 1):
                 "datetime": datetime
             })
 
+async def call_gemini(prompt: str, blog_text: bool = False) -> str:
+    
+    headers = {"Content-Type": "application/json"}
+    params = {"key": GEMINI_API_KEY}
+    if blog_text:
+        prompt = f"Write a detailed blog article about: {prompt}. Include an introduction, 3 main sections, and a conclusion."
+
+    json_data = {
+        "contents": [
+            {"parts": [{"text": prompt}]}
+        ]
+    }
+
+    try:
+        async with httpx.AsyncClient(timeout=15.0) as client:
+            response = await client.post(GEMINI_URL, headers=headers, params=params, json=json_data)
+            response.raise_for_status()
+            result = response.json()
+            return result["candidates"][0]["content"]["parts"][0]["text"]
+    except httpx.HTTPError as e:
+        print(f"[Gemini API Error] {e}")
+        return "⚠️ Sorry, I couldn't reach the AI service. Please try again later."
+    except Exception as e:
+        print(f"[Gemini Unexpected Error] {e}")
+        return "⚠️ Something went wrong. Try again later."
+
+
+@app.get("/blog/category/{category}", response_class=HTMLResponse)
+async def category_blogs(request: Request, category: str, page: int = 1):
+    if page < 1:
+        page = 1
+        
+    blogs_per_page = 12
+    offset = (page - 1) * blogs_per_page
+    
+    async with SessionLocal() as session:
+        # Get total count for category
+        total_result = await session.execute(
+            select(func.count(Blog.id)).where(Blog.category == category)
+        )
+        total = total_result.scalar() or 0
+        
+        if total == 0:
+            return templates.TemplateResponse("category_blogs.html", {
+                "request": request,
+                "blogs": [],
+                "category": category,
+                "current_page": 1,
+                "total_pages": 1
+            })
+        
+        # Get paginated blogs for category
+        blogs_result = await session.execute(
+            select(Blog)
+            .where(Blog.category == category)
+            .order_by(Blog.created_at.desc())
+            .offset(offset)
+            .limit(blogs_per_page)
+        )
+        blogs = blogs_result.scalars().all()
+        
+        total_pages = max(1, (total + blogs_per_page - 1) // blogs_per_page)
+        
+        if page > total_pages:
+            return RedirectResponse(url=f"/blog/category/{category}?page={total_pages}")
+        
+        return templates.TemplateResponse("category_blogs.html", {
+            "request": request,
+            "blogs": blogs,
+            "category": category,
+            "current_page": page,
+            "total_pages": total_pages
+        })
+
 async def generate_image(prompt: str, chat_id: int, token: str, user: str):
     together_api_key = os.getenv("TOGETHER_API_KEY")
     together_url = "https://api.together.xyz/v1/images/generations"
@@ -234,23 +322,32 @@ async def generate_image(prompt: str, chat_id: int, token: str, user: str):
         "width": 432,
         "height": 768
     }
+    print(f"Generating image with prompt: {prompt}")
+    print(f"Payload: {payload}")
     response = requests.post(together_url, json=payload, headers=together_headers)
     if response.ok:
         image_url = response.json()["data"][0]["url"]
+        print(f"Generated image URL: {image_url}")
         new_id = await insert_image_url(
             user=user,
             query=prompt,
             link=image_url,
             chat_id=chat_id
         )
+        print("Inserted row id:", new_id)
         await send_image_to_telegram(image_url, chat_id, token, user)
     else:
         await send_api_request(token, "sendMessage", {
             "chat_id": chat_id,
             "text": "⚠️ Failed to generate image. Please try again later."
         })
+        exit()
 
 async def send_image_to_telegram(image_url: str, chat_id: int, token: str, user: str):
+    payload = {
+        "chat_id": chat_id,
+        "photo": image_url
+    }
     telegram_payload = {
         "chat_id": chat_id,
         "photo": image_url,
@@ -258,10 +355,11 @@ async def send_image_to_telegram(image_url: str, chat_id: int, token: str, user:
     }
     await send_api_request(token, "sendPhoto", telegram_payload)
 
+# --- Insert Function ---
 async def insert_image_url(user: str, query: str, link: str, chat_id: int):
     async with SessionLocal() as session:
         new_entry = ImageUrl(user=user, query=query, link=link, chat_id=chat_id)
         session.add(new_entry)
         await session.commit()
-        await session.refresh(new_entry)
-        return new_entry.id
+        await session.refresh(new_entry)  # get id after insert
+        return new_entry.id   # returning inserted row id

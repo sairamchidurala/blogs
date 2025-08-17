@@ -179,33 +179,33 @@ async def blogs_home(request: Request, query: str = None, page: int = 1):
             # Redirect to individual blog post
             return RedirectResponse(url=f"/blog/post/{urllib.parse.quote(query)}")
         
-            # Get blogs grouped by category (max 3 per category)
-            categories_result = await session.execute(
-                select(Blog.category, func.count(Blog.id).label('count'))
-                .where(Blog.category.isnot(None))
-                .group_by(Blog.category)
-                .order_by(func.count(Blog.id).desc())
+        # Get blogs grouped by category (max 3 per category)
+        categories_result = await session.execute(
+            select(Blog.category, func.count(Blog.id).label('count'))
+            .where(Blog.category.isnot(None))
+            .group_by(Blog.category)
+            .order_by(func.count(Blog.id).desc())
+        )
+        categories = categories_result.all()
+        
+        blogs_by_category = {}
+        for category, count in categories:
+            blogs_result = await session.execute(
+                select(Blog)
+                .where(Blog.category == category)
+                .order_by(Blog.created_at.desc())
+                .limit(3)
             )
-            categories = categories_result.all()
-            
-            blogs_by_category = {}
-            for category, count in categories:
-                blogs_result = await session.execute(
-                    select(Blog)
-                    .where(Blog.category == category)
-                    .order_by(Blog.created_at.desc())
-                    .limit(3)
-                )
-                blogs_by_category[category] = {
-                    'blogs': blogs_result.scalars().all(),
-                    'total': count
-                }
-            
-            return templates.TemplateResponse("blogs.html", {
-                "request": request,
-                "blogs_by_category": blogs_by_category,
-                "datetime": datetime
-            })
+            blogs_by_category[category] = {
+                'blogs': blogs_result.scalars().all(),
+                'total': count
+            }
+        
+        return templates.TemplateResponse("blogs.html", {
+            "request": request,
+            "blogs_by_category": blogs_by_category,
+            "datetime": datetime
+        })
 
 async def generate_image(prompt: str, chat_id: int, token: str, user: str):
     together_api_key = os.getenv("TOGETHER_API_KEY")

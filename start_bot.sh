@@ -18,7 +18,7 @@ if [ -f "app.pid" ]; then
 fi
 
 # Run the app
-nohup uvicorn main_clean:app --host 0.0.0.0 --port 8000 --log-level info > logs/app.log 2>&1 &
+nohup uvicorn main:app --host 0.0.0.0 --port 8000 --log-level info > logs/app.log 2>&1 &
 echo $! > app.pid
 
 echo "Blog app started successfully!"

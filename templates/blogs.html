@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>All Blogs</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --secondary: #7c3aed;
+            --accent: #ec4899;
+            --bg: #f8fafc;
+            --text: #1e293b;
+            --light-text: #64748b;
+            --card-bg: #ffffff;
+            --card-hover: #f1f5f9;
+            --border-radius: 12px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        /* Gradient background animation */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg,
+                    rgba(37, 99, 235, 0.05) 0%,
+                    rgba(124, 58, 237, 0.05) 50%,
+                    rgba(236, 72, 153, 0.05) 100%);
+            z-index: -1;
+            animation: gradientShift 15s ease infinite;
+            background-size: 200% 200%;
+        }
+
+        @keyframes gradientShift {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 2rem 1.5rem;
+            text-align: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 2.2rem;
+            font-weight: 700;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        main {
+            max-width: 1200px;
+            margin: 3rem auto;
+            padding: 0 1.5rem;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 1.75rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(to bottom, var(--primary), var(--accent));
+            transition: var(--transition);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            background-color: var(--card-hover);
+        }
+
+        .card:hover::before {
+            width: 6px;
+        }
+
+        .card a {
+            text-decoration: none;
+            color: var(--primary);
+            font-size: 1.25rem;
+            font-weight: 600;
+            display: block;
+            margin-bottom: 0.75rem;
+            transition: var(--transition);
+            position: relative;
+            padding-left: 0.5rem;
+        }
+
+        .card a::after {
+            content: '→';
+            position: absolute;
+            right: 0;
+            opacity: 0;
+            transition: var(--transition);
+            color: var(--accent);
+        }
+
+        .card a:hover {
+            color: var(--primary-dark);
+            padding-left: 0.75rem;
+        }
+
+        .card a:hover::after {
+            opacity: 1;
+            right: -1rem;
+        }
+
+        .card .date {
+            font-size: 0.9rem;
+            color: var(--light-text);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card .date i {
+            color: var(--accent);
+            font-size: 0.8rem;
+        }
+
+        footer {
+            margin-top: 5rem;
+            text-align: center;
+            color: var(--light-text);
+            padding: 2rem 0;
+            position: relative;
+        }
+
+        footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 1px;
+            background: linear-gradient(to right, transparent, var(--light-text), transparent);
+        }
+
+        .footer-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .social-link {
+            color: var(--light-text);
+            font-size: 1.2rem;
+            transition: var(--transition);
+        }
+
+        .social-link:hover {
+            color: var(--accent);
+            transform: translateY(-2px);
+        }
+
+        /* Dark mode toggle */
+        #darkToggle {
+            position: fixed;
+            top: 1.5rem;
+            right: 1.5rem;
+            z-index: 100;
+            background: var(--primary);
+            color: white;
+            border: none;
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: var(--transition);
+        }
+
+        #darkToggle:hover {
+            background: var(--primary-dark);
+            transform: scale(1.1);
+        }
+
+        /* Floating particles */
+        .particle {
+            position: fixed;
+            background: var(--primary);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: -1;
+            opacity: 0.3;
+            animation: float linear infinite;
+        }
+
+        @keyframes float {
+            to {
+                transform: translateY(-100vh) rotate(360deg);
+            }
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 1.8rem;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            .card {
+                padding: 1.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            header {
+                padding: 1.5rem 1rem;
+            }
+
+            header h1 {
+                font-size: 1.5rem;
+            }
+
+            main {
+                margin: 2rem auto;
+                padding: 0 1rem;
+            }
+
+            #darkToggle {
+                top: 1rem;
+                right: 1rem;
+                width: 2.25rem;
+                height: 2.25rem;
+            }
+        }
+
+        /* Update your search input styles */
+        .header-controls {
+            position: fixed;
+            top: 1.5rem;
+            right: 1.5rem;
+            z-index: 100;
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .search-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        #searchInput {
+            padding: 0.6rem 2rem 0.6rem 2.5rem;
+            /* Adjusted for both icons */
+            border-radius: 2rem;
+            border: none;
+            background: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            width: 160px;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        #searchInput:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px var(--primary);
+            width: 200px;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1rem;
+            color: var(--light-text);
+            pointer-events: none;
+        }
+
+        .clear-icon {
+            position: absolute;
+            right: 3.5rem;
+            /* Position next to search button */
+            color: var(--light-text);
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        #searchInput:not(:placeholder-shown)+.clear-icon {
+            opacity: 1;
+        }
+
+        #searchButton {
+            background: var(--primary);
+            color: white;
+            border: none;
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: var(--transition);
+        }
+
+        #searchButton:hover {
+            background: var(--primary-dark);
+            transform: scale(1.1);
+        }
+
+        /* Add pagination styles */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 2rem;
+            padding: 1rem 0;
+        }
+
+        .pagination a {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+        }
+
+        .pagination a:hover:not(.disabled) {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .pagination .disabled {
+            background: var(--light-text);
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .page-info {
+            display: flex;
+            align-items: center;
+            color: var(--text-light);
+        }
+
+        body.dark-mode .page-info {
+            color: var(--text-dark);
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- <button id="darkToggle" aria-label="Toggle dark mode">
+        <i class="fas fa-moon"></i>
+    </button>
+
+    <div class="search-container">
+        <input type="text" id="searchInput" placeholder="Search blogs..." aria-label="Search blogs">
+        <button id="searchButton" aria-label="Search">
+            <i class="fas fa-search"></i>
+        </button>
+    </div> -->
+
+    <div class="header-controls">
+        <div class="search-container">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" id="searchInput" placeholder="Search blogs..." aria-label="Search blogs">
+            <i class="fas fa-times clear-icon" id="clearSearch"></i>
+            <button id="searchButton" aria-label="Search">
+                <i class="fas fa-search"></i>
+            </button>
+        </div>
+        <button id="darkToggle" aria-label="Toggle dark mode">
+            <i class="fas fa-moon"></i>
+        </button>
+    </div>
+
+    <header>
+        <h1>Explore Blog Articles</h1>
+    </header>
+
+    <main>
+        <div class="grid">
+            {% for blog in blogs %}
+            <div class="card">
+                <a href="/blog/{{ blog.query }}">{{ blog.title }}</a>
+                <div class="date">
+                    <i class="far fa-calendar-alt"></i>
+                    {{ blog.created_at.strftime('%b %d, %Y') }}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="pagination">
+            {% if current_page > 1 %}
+            <a href="/blog?page={{ current_page - 1 }}">Previous</a>
+            {% else %}
+            <span class="disabled">Previous</span>
+            {% endif %}
+
+            <div class="page-info">
+                Page {{ current_page }} of {{ total_pages }}
+            </div>
+
+            {% if current_page < total_pages and blogs %} <a href="/blog?page={{ current_page + 1 }}">Next</a>
+                {% else %}
+                <span class="disabled">Next</span>
+                {% endif %}
+        </div>
+    </main>
+
+    <!-- <main>
+        <div class="grid">
+            {% for blog in blogs %}
+            <div class="card">
+                <a href="/blog/{{ blog.query }}">{{ blog.title }}</a>
+                <div class="date">
+                    <i class="far fa-calendar-alt"></i>
+                    {{ blog.created_at.strftime('%b %d, %Y') }}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </main> -->
+
+    <footer>
+        <div class="footer-content">
+            <div class="social-links">
+                <a href="https://github.com/sairamchidurala" class="social-link" aria-label="GitHub"><i
+                        class="fab fa-github"></i></a>
+                <a href="https://www.linkedin.com/in/sairam-chidurala" class="social-link" aria-label="LinkedIn"><i
+                        class="fab fa-linkedin"></i></a>
+            </div>
+            <div id="footer">&copy; <span id="year"></span> Hell0Killer. All rights reserved.</div>
+        </div>
+    </footer>
+
+    <script>
+        // Set current year
+        document.getElementById('year').textContent = new Date().getFullYear();
+
+        // Dark mode toggle functionality
+        const toggleBtn = document.getElementById('darkToggle');
+        const icon = toggleBtn.querySelector('i');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const storedMode = localStorage.getItem('dark-mode');
+
+        // Set initial mode
+        if (storedMode === 'true' || (storedMode === null && prefersDark)) {
+            document.body.classList.add('dark-mode');
+            icon.classList.replace('fa-moon', 'fa-sun');
+        }
+        document.addEventListener('DOMContentLoaded', function () {
+            const searchInput = document.getElementById('searchInput');
+            const searchButton = document.getElementById('searchButton');
+
+            function performSearch() {
+                const query = searchInput.value.trim();
+                if (query) {
+                    // Encode the query for URL
+                    const encodedQuery = encodeURIComponent(query);
+                    // Redirect to the blog page with the query
+                    window.location.href = `/blog/${encodedQuery}`;
+                }
+            }
+
+            // Search on button click
+            searchButton.addEventListener('click', performSearch);
+
+            // Search on Enter key
+            searchInput.addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') {
+                    performSearch();
+                }
+            });
+
+            // Focus search input on Ctrl+K (common search shortcut)
+            document.addEventListener('keydown', function (e) {
+                if (e.ctrlKey && e.key === 'k') {
+                    e.preventDefault();
+                    searchInput.focus();
+                }
+            });
+        });
+
+        // Create floating particles
+        function createParticles() {
+            const colors = ['#2563eb', '#7c3aed', '#ec4899'];
+            const particleCount = window.innerWidth < 768 ? 15 : 30;
+
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+
+                // Random properties
+                const size = Math.random() * 10 + 5;
+                const posX = Math.random() * window.innerWidth;
+                const duration = Math.random() * 20 + 10;
+                const delay = Math.random() * 5;
+                const color = colors[Math.floor(Math.random() * colors.length)];
+
+                // Apply properties
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                particle.style.left = `${posX}px`;
+                particle.style.bottom = `-${size}px`;
+                particle.style.background = color;
+                particle.style.animationDuration = `${duration}s`;
+                particle.style.animationDelay = `${delay}s`;
+
+                document.body.appendChild(particle);
+
+                // Remove particle after animation completes
+                setTimeout(() => {
+                    particle.remove();
+                }, duration * 1000);
+            }
+
+            // Create new particles periodically
+            setTimeout(createParticles, 15000);
+        }
+
+        // Initialize particles
+        createParticles();
+
+
+        // Toggle function
+        toggleBtn.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            const isDark = document.body.classList.contains('dark-mode');
+            localStorage.setItem('dark-mode', isDark);
+
+            if (isDark) {
+                icon.classList.replace('fa-moon', 'fa-sun');
+            } else {
+                icon.classList.replace('fa-sun', 'fa-moon');
+            }
+        });
+
+        // Add clear functionality
+        document.addEventListener('DOMContentLoaded', function () {
+            const searchInput = document.getElementById('searchInput');
+            const clearIcon = document.getElementById('clearSearch');
+
+            // Clear input when X is clicked
+            clearIcon.addEventListener('click', function () {
+                searchInput.value = '';
+                searchInput.focus();
+                clearIcon.style.opacity = '0';
+            });
+
+            // Show/hide clear icon based on input
+            searchInput.addEventListener('input', function () {
+                clearIcon.style.opacity = this.value ? '1' : '0';
+            });
+        });
+
+        // Add dark mode variables if needed
+        const style = document.createElement('style');
+        style.textContent = `
+        body.dark-mode {
+            --bg: #0f172a;
+            --text: #f1f5f9;
+            --light-text: #94a3b8;
+            --card-bg: #1e293b;
+            --card-hover: #334155;
+        }
+
+        body.dark-mode::before {
+            background: linear-gradient(135deg,
+                rgba(37, 99, 235, 0.1) 0%,
+                rgba(124, 58, 237, 0.1) 50%,
+                rgba(236, 72, 153, 0.1) 100%);
+        }
+
+        body.dark-mode header {
+            background: linear-gradient(135deg, #1e40af, #5b21b6);
+        }
+    `;
+        document.head.appendChild(style);
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>AI Blog Generator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1e40af;
+      --secondary: #7c3aed;
+      --accent: #ec4899;
+      --bg-light: #f8fafc;
+      --bg-dark: #0f172a;
+      --text-light: #1e293b;
+      --text-dark: #f1f5f9;
+      --glass-light: rgba(255, 255, 255, 0.85);
+      --glass-dark: rgba(15, 23, 42, 0.85);
+      --card-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background: var(--bg-light);
+      color: var(--text-light);
+      transition: var(--transition);
+      line-height: 1.6;
+    }
+
+    body.dark-mode {
+      background: var(--bg-dark);
+      color: var(--text-dark);
+    }
+
+    /* Gradient background animation */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg,
+          rgba(37, 99, 235, 0.05) 0%,
+          rgba(124, 58, 237, 0.05) 50%,
+          rgba(236, 72, 153, 0.05) 100%);
+      z-index: -1;
+      animation: gradientShift 15s ease infinite;
+      background-size: 200% 200%;
+    }
+
+    body.dark-mode::before {
+      background: linear-gradient(135deg,
+          rgba(37, 99, 235, 0.1) 0%,
+          rgba(124, 58, 237, 0.1) 50%,
+          rgba(236, 72, 153, 0.1) 100%);
+    }
+
+    @keyframes gradientShift {
+      0% {
+        background-position: 0% 50%;
+      }
+
+      50% {
+        background-position: 100% 50%;
+      }
+
+      100% {
+        background-position: 0% 50%;
+      }
+    }
+
+    /* Main content */
+    .container {
+      max-width: 900px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+    }
+
+    main {
+      background: var(--glass-light);
+      backdrop-filter: blur(12px);
+      border-radius: 1rem;
+      padding: 2.5rem;
+      box-shadow: var(--card-shadow);
+      transition: var(--transition);
+      animation: fadeInUp 0.8s ease-out;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    body.dark-mode main {
+      background: var(--glass-dark);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Typography */
+    h1,
+    h2,
+    h3 {
+      color: var(--primary);
+      margin: 1.5rem 0 1rem;
+      font-weight: 600;
+      position: relative;
+    }
+
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3 {
+      color: var(--secondary);
+    }
+
+    h1 {
+      font-size: 2.2rem;
+      line-height: 1.2;
+    }
+
+    h2 {
+      font-size: 1.8rem;
+      padding-bottom: 0.5rem;
+    }
+
+    h2::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 60px;
+      height: 3px;
+      background: var(--accent);
+      transition: width 0.3s ease;
+    }
+
+    h2:hover::after {
+      width: 100px;
+    }
+
+    p {
+      margin: 1rem 0;
+    }
+
+    /* Code blocks */
+    pre {
+      background: #1e293b;
+      color: #f8fafc;
+      padding: 1.25rem;
+      border-radius: 0.75rem;
+      overflow-x: auto;
+      font-family: 'Fira Code', monospace;
+      margin: 1.5rem 0;
+      box-shadow: var(--card-shadow);
+      transition: var(--transition);
+      position: relative;
+    }
+
+    pre::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: var(--accent);
+      border-radius: 0.75rem 0 0 0.75rem;
+    }
+
+    pre:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+
+    code {
+      font-family: 'Fira Code', monospace;
+      background: rgba(226, 232, 240, 0.2);
+      padding: 0.2rem 0.4rem;
+      border-radius: 0.25rem;
+      font-size: 0.9em;
+    }
+
+    body.dark-mode code {
+      background: rgba(15, 23, 42, 0.5);
+    }
+
+    /* Blockquotes */
+    blockquote {
+      border-left: 4px solid var(--accent);
+      margin: 1.5rem 0;
+      padding: 1rem 1.5rem;
+      background: rgba(226, 232, 240, 0.2);
+      border-radius: 0 0.5rem 0.5rem 0;
+      font-style: italic;
+      transition: var(--transition);
+    }
+
+    body.dark-mode blockquote {
+      background: rgba(15, 23, 42, 0.5);
+    }
+
+    blockquote:hover {
+      transform: translateX(5px);
+    }
+
+    /* Lists */
+    ul,
+    ol {
+      margin: 1rem 0 1rem 1.5rem;
+      /* Reduced left margin */
+      padding-left: 0.5rem;
+      /* Added some padding */
+    }
+
+    li {
+      margin-bottom: 1rem;
+      line-height: 1.6;
+    }
+
+    li p {
+      display: inline;
+      margin: 0;
+    }
+
+    ul li::before {
+      content: '•';
+      color: var(--accent);
+      font-weight: bold;
+      display: inline-block;
+      width: 1em;
+      margin-left: -1em;
+      /* Pulls bullet into margin */
+    }
+
+    /* For ordered lists */
+    ol {
+      list-style-type: decimal;
+    }
+
+    ol li {
+      list-style-position: outside;
+      padding-left: 1.5em;
+      text-indent: -1.5em;
+    }
+
+    /* Error message */
+    .error {
+      background: rgba(239, 68, 68, 0.1);
+      border-left: 4px solid #ef4444;
+      padding: 1.25rem;
+      border-radius: 0.5rem;
+      margin: 1.5rem 0;
+      animation: shake 0.5s ease;
+    }
+
+    @keyframes shake {
+
+      0%,
+      100% {
+        transform: translateX(0);
+      }
+
+      20%,
+      60% {
+        transform: translateX(-5px);
+      }
+
+      40%,
+      80% {
+        transform: translateX(5px);
+      }
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 2rem 1rem;
+      margin-top: auto;
+      font-size: 0.9rem;
+      color: #64748b;
+      transition: var(--transition);
+    }
+
+    body.dark-mode footer {
+      color: #94a3b8;
+    }
+
+    .footer-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .social-links {
+      display: flex;
+      gap: 1.5rem;
+    }
+
+    .social-link {
+      color: currentColor;
+      font-size: 1.2rem;
+      transition: var(--transition);
+    }
+
+    .social-link:hover {
+      color: var(--accent);
+      transform: translateY(-2px);
+    }
+
+    /* Dark mode toggle */
+    #darkToggle {
+      position: fixed;
+      top: 1.5rem;
+      right: 1.5rem;
+      z-index: 100;
+      background: var(--primary);
+      color: white;
+      border: none;
+      width: 2.5rem;
+      height: 2.5rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      transition: var(--transition);
+    }
+
+    #darkToggle:hover {
+      background: var(--primary-dark);
+      transform: scale(1.1);
+    }
+
+    /* Floating particles */
+    .particle {
+      position: fixed;
+      background: var(--primary);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: -1;
+      opacity: 0.3;
+      animation: float linear infinite;
+    }
+
+    @keyframes float {
+      to {
+        transform: translateY(-100vh) rotate(360deg);
+      }
+    }
+
+    /* Responsive design */
+    @media (max-width: 768px) {
+      .container {
+        padding: 0 1rem;
+      }
+
+      main {
+        padding: 1.5rem;
+      }
+
+      h1 {
+        font-size: 1.8rem;
+      }
+
+      h2 {
+        font-size: 1.5rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      main {
+        padding: 1.25rem;
+      }
+
+      #darkToggle {
+        top: 1rem;
+        right: 1rem;
+        width: 2.25rem;
+        height: 2.25rem;
+      }
+    }
+
+    /* Add this to your existing CSS */
+    .back-button {
+      position: fixed;
+      top: 1.5rem;
+      left: 1.5rem;
+      z-index: 100;
+      background: var(--primary);
+      color: white;
+      border: none;
+      width: 2.5rem;
+      height: 2.5rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      transition: var(--transition);
+    }
+
+    .back-button:hover {
+      background: var(--primary-dark);
+      transform: scale(1.1);
+    }
+
+    @media (max-width: 768px) {
+      .back-button {
+        top: 1rem;
+        left: 1rem;
+        width: 2.25rem;
+        height: 2.25rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <button id="darkToggle" aria-label="Toggle dark mode">
+    <i class="fas fa-moon"></i>
+  </button>
+  <button class="back-button" aria-label="Back to all blogs" onclick="window.location.href='/blog'">
+    <i class="fas fa-arrow-left"></i>
+  </button>
+  <div class="container">
+    <main>
+      {% if error %}
+      <p class="error">{{ error }}</p>
+      {% else %}
+      <article>
+        {{ content | safe }}
+      </article>
+      {% endif %}
+    </main>
+  </div>
+  <footer>
+    <div class="footer-content">
+      <div class="social-links">
+        <div class="social-links">
+          <a href="https://github.com/sairamchidurala" class="social-link" aria-label="GitHub"><i
+              class="fab fa-github"></i></a>
+          <a href="https://www.linkedin.com/in/sairam-chidurala" class="social-link" aria-label="LinkedIn"><i
+              class="fab fa-linkedin"></i></a>
+        </div>
+      </div>
+      <div id="footer">&copy; <span id="year"></span> Hell0Killer. All rights reserved.</div>
+    </div>
+  </footer>
+  <script>
+    // Set current year
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // Enhanced dark mode toggle with icon change
+    const toggleBtn = document.getElementById('darkToggle');
+    const icon = toggleBtn.querySelector('i');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const storedMode = localStorage.getItem('dark-mode');
+
+    // Set initial mode
+    if (storedMode === 'true' || (storedMode === null && prefersDark)) {
+      document.body.classList.add('dark-mode');
+      icon.classList.replace('fa-moon', 'fa-sun');
+    }
+
+    // Toggle function
+    toggleBtn.addEventListener('click', () => {
+      document.body.classList.toggle('dark-mode');
+      const isDark = document.body.classList.contains('dark-mode');
+      localStorage.setItem('dark-mode', isDark);
+
+      if (isDark) {
+        icon.classList.replace('fa-moon', 'fa-sun');
+      } else {
+        icon.classList.replace('fa-sun', 'fa-moon');
+      }
+    });
+
+    // Create floating particles
+    function createParticles() {
+      const colors = ['#2563eb', '#7c3aed', '#ec4899'];
+      const particleCount = window.innerWidth < 768 ? 15 : 30;
+
+      for (let i = 0; i < particleCount; i++) {
+        const particle = document.createElement('div');
+        particle.classList.add('particle');
+
+        // Random properties
+        const size = Math.random() * 10 + 5;
+        const posX = Math.random() * window.innerWidth;
+        const duration = Math.random() * 20 + 10;
+        const delay = Math.random() * 5;
+        const color = colors[Math.floor(Math.random() * colors.length)];
+
+        // Apply properties
+        particle.style.width = `${size}px`;
+        particle.style.height = `${size}px`;
+        particle.style.left = `${posX}px`;
+        particle.style.bottom = `-${size}px`;
+        particle.style.background = color;
+        particle.style.animationDuration = `${duration}s`;
+        particle.style.animationDelay = `${delay}s`;
+
+        document.body.appendChild(particle);
+
+        // Remove particle after animation completes
+        setTimeout(() => {
+          particle.remove();
+        }, duration * 1000);
+      }
+
+      // Create new particles periodically
+      setTimeout(createParticles, 15000);
+    }
+
+    // Initialize particles
+    createParticles();
+
+    // Smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+          behavior: 'smooth'
+        });
+      });
+    });
+
+    // Shortcut for back button (Alt+ArrowLeft)
+    document.addEventListener('keydown', function (e) {
+      if (e.altKey && e.key === 'ArrowLeft') {
+        window.location.href = '/blog';
+      }
+    });
+  </script>
+</body>
+
+</html>

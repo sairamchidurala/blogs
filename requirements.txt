@@ -1,0 +1,12 @@
+fastapi
+uvicorn
+httpx
+requests
+jinja2
+python-multipart
+markdown
+sqlalchemy
+aiomysql
+python-dotenv
+openai
+greenlet

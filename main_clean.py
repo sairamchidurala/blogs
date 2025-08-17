@@ -5,6 +5,7 @@ import logging
 
 from app.core.database import engine
 from app.api.blog_routes import router as blog_router
+from app.api.webhook_routes import router as webhook_router
 from models import Base
 
 # Setup logging
@@ -34,6 +35,7 @@ async def health_check():
 
 # Include routers
 app.include_router(blog_router, prefix="/blog", tags=["blogs"])
+app.include_router(webhook_router, prefix="/webhook", tags=["webhook"])
 
 if __name__ == "__main__":
     import uvicorn

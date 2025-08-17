@@ -62,8 +62,8 @@ async def telegram_webhook(bot_name: str, request: Request):
 
     if "text" in message:
         user_input = message["text"]
-        if user_input.startswith('.'):
-            text = user_input[1:]
+        if user_input.startswith('.image'):
+            text = user_input[7:]
             await generate_image(text, chat_id, token, message["from"]["first_name"])
             return {"ok": True}
         
